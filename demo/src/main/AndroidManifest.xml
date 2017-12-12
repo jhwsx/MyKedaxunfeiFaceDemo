@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.example.demo">
-
+    <!--使用相机的权限-->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!--必须有相机设备-->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true"/>
+    <!--可以没有自动对焦功能-->
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false"/>
+    <!--用于保存照片的写入存储器权限-->
+    <uses-permission android:name="android.permission.WEITE_EXTERNAL_STORAGE"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
