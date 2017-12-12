@@ -51,8 +51,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     private void initViews() {
         mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
-        mSurfaceHolder = mSurfaceView.getHolder();
-        mSurfaceHolder.addCallback(this);
+        mSurfaceHolder = mSurfaceView.getHolder(); // 获取SurfaceView的holder，起获取和控制surface的作用
+        mSurfaceHolder.addCallback(this); // 给SurfaceHolder设置回调接口
         mBtnRegister = (Button) findViewById(R.id.button_register);
         mSurfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,8 +77,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
      * @return pic Path
      */
     private File getOutputMediaFile() {
-        File mediaStorageDir = new File(Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
+        File mediaStorageDir = new File(MainActivity.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "MyCameraApp");
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 return null;
@@ -134,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
      */
     private Camera getCamera() {
         try {
-            mCamera = Camera.open();
+            mCamera = Camera.open(FindFrontCamera());
         } catch (Exception e) {
             mCamera = null;
         }
@@ -161,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
      */
     private void setStartPreview(Camera camera, SurfaceHolder holder) {
         try {
-            camera.setPreviewDisplay(holder);
+            camera.setPreviewDisplay(holder);// 这个方法必须在startPreview之前调用
             camera.setDisplayOrientation(90);
             camera.startPreview();
         } catch (IOException e) {
@@ -180,16 +179,33 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
+        setStartPreview(mCamera, holder);
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+        // 重启功能
+        mCamera.stopPreview();
+        setStartPreview(mCamera, holder);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        releaseCamera();
+    }
 
+    private int FindFrontCamera(){
+        int cameraCount = 0;
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        cameraCount = Camera.getNumberOfCameras(); // get cameras number
+
+        for ( int camIdx = 0; camIdx < cameraCount;camIdx++ ) {
+            Camera.getCameraInfo( camIdx, cameraInfo ); // get camerainfo
+            if ( cameraInfo.facing ==Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+                // 代表摄像头的方位，目前有定义值两个分别为CAMERA_FACING_FRONT前置和CAMERA_FACING_BACK后置
+                return camIdx;
+            }
+        }
+        return -1;
     }
 }
